@@ -1,0 +1,27 @@
+int bluePin = 10;
+int potPin = A2;
+int potVal;
+int writeVal;
+int waitT = 100;
+int br = 9600;
+
+void setup() {
+  Serial.begin(br);
+  pinMode(potPin,INPUT);
+  pinMode(bluePin, OUTPUT);
+  // put your setup code here, to run once:
+
+}
+
+void loop() {
+  potVal = analogRead(potPin);
+  writeVal = (255.0/1023.0)*potVal;
+  analogWrite(bluePin,writeVal);
+ 
+  
+}
+
+What does this program do?
+This program allows the potentiometer to control an LED's brightness (bluepin) by reading an analog voltage (5v), 
+converting it into a PWM signal (0-255), and applying it to an LED. As you move the switch it increases the 
+brightness of the LED. 
