@@ -1,0 +1,73 @@
+int redPin = 9;
+int greenPin = 10;
+int bluePin = 11;
+int potPin = A2;
+int potVal;
+int writeVal;
+int colorIndex = 0; // 0 = Red, 1 = Green, 2 = Blue
+int br = 9600;
+bool wasAtBottom = false; 
+bool turnCompleted = false; 
+bool ledOff = false; 
+
+void setup() {
+  Serial.begin(br);
+  pinMode(potPin, INPUT);
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+}
+
+void loop() {
+  potVal = analogRead(potPin); // Read potentiometer value
+  writeVal = (255.0 / 1023.0) * potVal; // Scale value to 0-255
+
+  #Check if potentiometer is at the bottom (near 0)
+  if (potVal <= 50) {
+    if (turnCompleted) { 
+      ledOff = true; // Turn off LED before switching color
+      turnCompleted = false; // Reset turn tracking
+    }
+    wasAtBottom = true; // Mark that we have reached the bottom
+  }
+
+  #Check if the potentiometer has moved far enough away from the bottom
+  if (potVal > 200 && wasAtBottom) {
+    turnCompleted = true; // Set flag to allow color cycling on next bottom hit
+    wasAtBottom = false; // Reset bottom tracking
+  }
+
+  // Turn off LED when hitting bottom
+  if (ledOff && potVal <= 50) {
+    analogWrite(redPin, 0);
+    analogWrite(greenPin, 0);
+    analogWrite(bluePin, 0);
+  }
+
+  #Only switch color when potentiometer moves away and comes back to bottom
+  if (ledOff && turnCompleted && potVal > 50) {
+    colorIndex = (colorIndex + 1) % 3; // Cycle through colors (0 -> 1 -> 2 -> 0)
+    ledOff = false; // Allow LED to turn back on
+  }
+
+  #Set the active color based on the cycle, but only if LED is allowed back on
+  if (!ledOff) {
+    if (colorIndex == 0) {
+      analogWrite(redPin, writeVal);
+      analogWrite(greenPin, 0);
+      analogWrite(bluePin, 0);
+    } else if (colorIndex == 1) {
+      analogWrite(redPin, 0);
+      analogWrite(greenPin, writeVal);
+      analogWrite(bluePin, 0);
+    } else {
+      analogWrite(redPin, 0);
+      analogWrite(greenPin, 0);
+      analogWrite(bluePin, writeVal);
+    }
+  }
+
+  delay(100); // Small delay for stability
+}
+
+This code allows for a potentieometer to change an RGB LED value to red, blue, or green, each on/off turn completed.
